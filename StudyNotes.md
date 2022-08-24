@@ -957,3 +957,189 @@ public R<Page> page(int page,int pageSize,String name){
 
 # Redis缓存优化
 
+## 配置
+
+### pom坐标
+
+### 配置文件
+
+### 配置set序列化
+
+~~~java
+@Configuration
+public class RedisConfig extends CachingConfigurerSupport {
+
+    @Bean
+    public RedisTemplate<Object,Object> redisTemplate(RedisConnectionFactory redisConnectionFactory){
+        RedisTemplate<Object,Object> redisTemplate = new RedisTemplate<>();
+
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        return redisTemplate;
+    }
+}
+~~~
+
+
+
+## 优化短信验证码
+
+* 服务端中注入RedisTemplate对象
+
+* SendMsg方法中，存入Redis
+
+* login方法中，删除Redis
+
+
+
+代码就不写了，后面使用Spring Cache框架
+
+
+
+
+
+## 缓存菜品数据
+
+* 改造Dish中List方法，先冲Redis中查询数据有就直接返回，没有再查数据库，并将数据放到Redis中。
+* 改造save和Update方法，及时的清理缓存
+
+
+
+在使用缓存过程中，要注意保证数据库中的数据和缓存中的数据一致，如果数据发生变化，需要及时清理缓存。
+
+
+
+## Spring Cache
+
+### 介绍
+
+实现了基于注解的缓存功能，只需要简单地加一个注释，就能实现缓存功能。
+
+SpringCache提供了一层抽象，底层可以切换不同的cache实现。
+
+CacheManager是Spring提供的各种缓存技术抽象接口。
+
+
+
+### Redis配置
+
+> pom
+
+spring-boot-starter-data-redis
+
+spring-boot-start-cache
+
+
+
+> 配置文件
+
+~~~yaml
+spring:
+ cache:
+  redis:
+   time-to-live: 180000 // 存活时间 毫秒
+~~~
+
+
+
+
+
+### 常用注解
+
+![image-20220824220642687](.img/image-20220824220642687.png)
+
+
+
+> CachePut
+
+CachePut 将方法返回值放入缓存
+
+这个注解有两个参数：
+
+value：缓存的名称，每个缓存名称下可以有多个key
+
+key：缓存的key
+
+
+
+key的值注意，提供了一种语法可以获取到注解方法的反射，包括方法名称，方法参数，方法返回值对象等。
+
+~~~java
+@CachePut(value = "userCache",key="#user.id")
+// key是获取请求参数对象，# + 参数名称
+@PostMapping
+public User save(User user){
+    return user;
+}
+~~~
+
+
+
+~~~java
+@CachePut(value = "userCache",key="#result.id")
+// key是获取返回值对象，# + result
+@PostMapping
+public User save(User user){
+    return user;
+}
+~~~
+
+
+
+* #root.methodName   方法名称
+* #root.method    方法对象
+
+
+
+> CacheEvict
+
+~~~java
+@CacheEvict(value = "userCache",key="#id")
+@DeketeMapping
+public void delete(Long id){
+    
+}
+~~~
+
+
+
+自动去删除对应key的值。在跟新数据库的时候也应该去清理缓存。
+
+
+
+删除value下的所有数据
+
+```java
+@CacheEvict(value = "setmealCache",allEntries = true)
+```
+
+**其实value是帮助你在不方便获取到key的地方进行操作**
+
+
+
+
+
+> Cacheable
+
+在执行方法前查询缓存，有就直接返回，没有就保存。
+
+
+
+注解使用参数同理。
+
+**多一个参数condition，设置缓存条件**
+
+~~~java
+@Cacheable(value = "user", key = "#id", condition="#result != null")
+~~~
+
+如果为空不缓存
+
+
+
+key可以进行拼接
+
+~~~java
+    @Cacheable(value = "setmealCache", key = "#setmeal.categoryId + '_' + #setmeal.status" )
+~~~
+

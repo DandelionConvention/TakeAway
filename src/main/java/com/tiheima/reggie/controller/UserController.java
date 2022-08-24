@@ -8,10 +8,12 @@ import com.tiheima.reggie.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/user")
@@ -20,10 +22,19 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     @PostMapping("/sendMsg")
     public R<String> sendMsg(@RequestBody User user, HttpSession session){
         // 获取手机号
         String phone = user.getPhone();
+
+        // 查看缓存，存在直接返回
+        Object codeCache = redisTemplate.opsForValue().get(phone);
+        if(codeCache != null){
+            return R.error("已经发送，稍后重试");
+        }
         //生成验证码
         if(StringUtils.isNotEmpty(phone)){
             Integer code = ValidateCodeUtils.generateValidateCode(4);
@@ -31,7 +42,10 @@ public class UserController {
             log.info("验证码生成：{}",code);
 
             // 保存session
-            session.setAttribute(phone,code.toString());
+//            session.setAttribute(phone,code.toString());
+
+            // 保存Redis
+            redisTemplate.opsForValue().set(phone,String.valueOf(code),5, TimeUnit.MINUTES);
 
             return R.success("发送成功");
         }
@@ -46,7 +60,9 @@ public class UserController {
     public R<User> login(@RequestBody Map user, HttpSession session){
         // 获取手机号
         String phone = (String) user.get("phone");
-        Object code = session.getAttribute(phone);
+//        Object code = session.getAttribute(phone);
+        Object code = redisTemplate.opsForValue().get(phone); // 获取缓存
+        redisTemplate.delete(phone); // 删除缓存
         if(user.get("code").toString().equals("1111")){
 
         }else {

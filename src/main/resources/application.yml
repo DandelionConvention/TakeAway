@@ -1,6 +1,9 @@
 server:
   port: 8080
 spring:
+  cache:
+    redis:
+      time-to-live: 180000
   application:
     name: reggie_take_out
   datasource:
