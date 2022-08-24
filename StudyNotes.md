@@ -124,6 +124,12 @@ public class MyMetaObjectHanderler implements MetaObjectHandler {
 }
 ```
 
+
+
+**注意：对每个属性进行判断，增加通用性。**如果不做判断，@TableField标签的类必须要有全部属性。
+
+
+
 ## 跨线程通信
 
 客户端发送的每次http请求，对应的在服务端都会分配一个新的线程来处理，在处理过程中下面的类都属于同一个线程。
@@ -940,3 +946,6 @@ public R<Page> page(int page,int pageSize,String name){
 ## Redis配置的坑
 
 **配置时密码一定要用引号，如果密码全是数字会被识别成数字导致连接失败。**
+
+
+

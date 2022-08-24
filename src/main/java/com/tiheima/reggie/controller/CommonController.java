@@ -57,7 +57,13 @@ public class CommonController {
     public void download(String name, HttpServletResponse response){
         //输入流读取文件内容
         try {
-            FileInputStream inputStream = new FileInputStream(new File(basePath+name));
+
+            File file = new File(basePath + name);
+            if(!file.exists()){
+                file = new File(basePath + "img04dea8fc-8a01-44f4-b001-cc44fce053a7.jpg");
+            }
+
+            FileInputStream inputStream = new FileInputStream(file);
             //输出流返回浏览器
             ServletOutputStream outputStream = response.getOutputStream();
             int len = 0;
@@ -73,4 +79,7 @@ public class CommonController {
             e.printStackTrace();
         }
     }
+
+
+
 }

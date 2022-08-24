@@ -47,10 +47,13 @@ public class UserController {
         // 获取手机号
         String phone = (String) user.get("phone");
         Object code = session.getAttribute(phone);
+        if(user.get("code").toString().equals("1111")){
 
-        if(!user.get("code").toString().equals(code.toString()) &&  !user.get("code").toString().equals("1111")){
-            log.info(user.get("code").toString()+"---"+code.toString());
-            return R.error("验证码错误");
+        }else {
+            if(code == null || !user.get("code").toString().equals(code.toString())){
+                log.info(user.get("code").toString()+"---"+code.toString());
+                return R.error("验证码错误");
+            }
         }
 
         // 判断数据库中是否又用户，没有就直接注册

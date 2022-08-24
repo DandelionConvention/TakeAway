@@ -34,7 +34,8 @@ public class LoginCheckFilter implements Filter {
                 "/backend/**",
                 "/front/**",
                 "/common/**",
-                "/user/**"
+                "/user/login",
+                "/user/sendMsg"
         };
 
         boolean check = check(urls,url);
@@ -54,7 +55,7 @@ public class LoginCheckFilter implements Filter {
 
         // 移动端登录验证
         if(request.getSession().getAttribute("user") != null){
-            BaseContext.setCurrentId((Long) request.getSession().getAttribute("employee"));
+            BaseContext.setCurrentId((Long) request.getSession().getAttribute("user"));
             filterChain.doFilter(request,response);
             return;
         }
