@@ -4,15 +4,16 @@ function loginApi(data) {
       'method': 'post',
       data
     })
-  }
+}
 
-function getPhoneCode(data) {
+function sendMsgApi(data) {
     return $axios({
-        'url': '/user/code',
-        'method': 'get',
-        params:{...data}
+        'url': '/user/sendMsg',
+        'method': 'post',
+        data
     })
 }
+
 function loginoutApi() {
   return $axios({
     'url': '/user/loginout',
