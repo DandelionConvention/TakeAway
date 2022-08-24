@@ -15,7 +15,6 @@ public class redisTest {
     @Test
     public void testString(){
         redisTemplate.opsForValue().set("city","beijing");
-
     }
 
 }
