@@ -33,7 +33,8 @@ public class LoginCheckFilter implements Filter {
                 "/employee/logout",
                 "/backend/**",
                 "/front/**",
-                "/common/**"
+                "/common/**",
+                "/user/**"
         };
 
         boolean check = check(urls,url);
@@ -46,6 +47,13 @@ public class LoginCheckFilter implements Filter {
         log.info("拦截请求：{}",request.getRequestURL());
 
         if(request.getSession().getAttribute("employee") != null){
+            BaseContext.setCurrentId((Long) request.getSession().getAttribute("employee"));
+            filterChain.doFilter(request,response);
+            return;
+        }
+
+        // 移动端登录验证
+        if(request.getSession().getAttribute("user") != null){
             BaseContext.setCurrentId((Long) request.getSession().getAttribute("employee"));
             filterChain.doFilter(request,response);
             return;

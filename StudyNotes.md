@@ -923,3 +923,20 @@ public R<Page> page(int page,int pageSize,String name){
     }
 ~~~
 
+
+
+
+
+
+
+## 登录实现
+
+没有redis是使用的session实现登录。
+
+
+
+
+
+## Redis配置的坑
+
+**配置时密码一定要用引号，如果密码全是数字会被识别成数字导致连接失败。**
