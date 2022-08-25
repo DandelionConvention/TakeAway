@@ -1143,3 +1143,233 @@ key可以进行拼接
     @Cacheable(value = "setmealCache", key = "#setmeal.categoryId + '_' + #setmeal.status" )
 ~~~
 
+
+
+
+
+
+
+# SQL主从复制
+
+MySql主从复制是一个异步的复制过程，底层是基于Mysql数据库自带的二进制日志功能。
+
+
+
+![image-20220825124235279](.img/image-20220825124235279.png)
+
+
+
+* master将改变记录到二进制日志
+* slave将master的binary log拷贝到它的中继日志
+* slave重做中继日志中的事件，将改变应用到自己的数据库中
+
+
+
+
+
+# Nginx
+
+是一款轻量Web服务器/反向代理服务器。其特点是占有内存少，并发能力强。**大厂都在用**
+
+
+
+## 介绍
+
+### 安装
+
+启动成功默认是80端口。
+
+### 文件目录
+
+* conf/nginx.conf		nginx配置文件
+* html                            存放静态文件（html、css、js）
+* logs                              日志目录
+* sbin/nginx                   二进制文件
+
+
+
+
+
+## Nginx命令
+
+~~~cmd
+nginx -v	# 查看版本
+nginx -t	# 检查配置文件
+nginx -s stop # 停止服务
+nginx -s reload # 重新加载配置文件
+~~~
+
+
+
+
+
+
+
+## Nginx配置文件结构
+
+配置文件整体分为三部分：
+
+* 全局块
+* events块
+* http块
+  * http全局块
+  * Server块
+    * Server全局块
+    * location块
+
+
+
+http里面可以配置多个Server块，每个Server块中可以配置多个location。
+
+
+
+![image-20220825131604312](.img/image-20220825131604312.png)
+
+
+
+## 部署静态资源
+
+可以作为静态的Web服务器。相对于tomcat，Nginx更NB。
+
+
+
+~~~conf
+server{
+	listen 80;    # 监听端口
+	server_name localhost;   # 服务器名称
+	location/{     # 匹配客户端请求
+		root html; # 指定静态资源目录
+		index index.html; # 指定默认首页
+	}     
+} 
+~~~
+
+
+
+## 正向代理
+
+是一个位于客户端和原始服务器之间的服务器，为了从原始服务器取得内容，客户端向代理发送一个请求并指定目标原始服务器，然后代理向原始服务器转交请求并将获得的内容返回给客户端。
+
+正向代理的典型用途是为在防火墙内的局域网客户端提供访问Internet的途径。
+
+正向代理一般是在客户端设置代理服务器，通过代理服务器转发请求，最终访问到目标服务器。
+
+**客户端知道**
+
+![image-20220825134536017](.img/image-20220825134536017.png)
+
+
+
+**由客户端自行设置，就是VPN，翻墙**
+
+
+
+## 反向代理
+
+反向代理服务器位于用户与目标服务器之间，但对用户而言，**反向代理就是相对于目标服务器用户不知道**，反向代理服务器复制将请求转发给目标服务器。
+
+用户不需要知道目标服务器的地址，也无须在客户端作任何设定。
+
+![image-20220825135538308](.img/image-20220825135538308.png)
+
+
+
+### 配置反向代理
+
+~~~conf
+server{
+	listen 82;
+	server_name localhost;
+	location / {
+		proxy_pass http://192.168.138.101:8080; # 反向代理配置，将请求转发到指定服务器
+	}
+}
+~~~
+
+![image-20220825135943340](.img/image-20220825135943340.png)
+
+访问82端口，映射到192.168.138.101:8080
+
+
+
+
+
+## 负载均衡
+
+其实就是基于反向代理实现的。
+
+默认是轮询算法。
+
+~~~conf
+upstream targetserver{
+	server 192.168.138.101:8080;
+	server 192.168.138.101:8081;
+} # 配置指定一组服务器
+
+server{
+	listen 8080;
+	server_name localhost;
+	location / {
+		proxy_pass http://targetserver;
+	}
+}
+
+~~~
+
+
+
+![image-20220825140227023](.img/image-20220825140227023.png)
+
+
+
+
+
+~~~conf
+upstream targetserver{
+	server 192.168.138.101:8080 weight=10;
+	server 192.168.138.101:8081 weight=5;
+} # 配置指定一组服务器
+
+server{
+	listen 8080;
+	server_name localhost;
+	location / {
+		proxy_pass http://targetserver;
+	}
+}
+~~~
+
+**指定权重**
+
+![image-20220825140650428](.img/image-20220825140650428.png)
+
+
+
+
+
+# 前后端分离开发
+
+## YApi
+
+api管理工具，可以轻松创建、发布、维护API，开发人员只需要利用平台提供的接口数据写入工具以及简单的点击操作就可以管理接口。
+
+
+
+
+
+接口的管理、文档的生成
+
+
+
+
+
+## Swagger
+
+Java生成接口文档
+
+
+
+
+
+# 项目部署
+
