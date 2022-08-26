@@ -41,4 +41,4 @@ mybatis-plus:
       id-type: ASSIGN_ID
 
 reggie:
-  path: \root\java\uploadImage\
+  path: /root/java/uploadImage/
